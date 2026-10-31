@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anzu Hanashiro — The Moonlit Kingdom</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="gameCanvas" aria-label="Playable open world game"></canvas>
+  <div id="worldEffects"></div>
+
+  <header id="locationBanner"><span>THE MOONLIT KINGDOM</span><b>—</b><strong id="locationName">Verdant Town</strong></header>
+
+  <aside id="hudLeft">
+    <canvas id="minimap" width="180" height="180"></canvas>
+    <div id="compass"><span>W</span><b id="compassHeading">N</b><span>E</span></div>
+    <div class="hud-row"><span id="clock">08:00</span><span id="weatherLabel">☀ Clear</span></div>
+  </aside>
+
+  <div id="interactPrompt"></div>
+  <div id="dialogue" class="hidden"><div class="dialoguePortrait">AH</div><div><h3 id="speakerName"></h3><p id="dialogueText"></p></div><button id="closeDialogue">Close</button></div>
+  <div id="toast"></div>
+
+  <nav id="quickBar">
+    <button id="weatherBtn" title="Toggle weather">☁ Weather</button>
+    <button id="timeBtn" title="Toggle day/night">◐ Time</button>
+    <button id="mapBtn" title="Map">▦ Map</button>
+    <button id="settingsBtn" title="Settings">⚙ Settings</button>
+  </nav>
+
+  <div id="mapOverlay" class="overlay hidden">
+    <div class="map-window"><button class="overlayClose">×</button><h2>Kingdom of Lumeria</h2><canvas id="largeMap" width="900" height="520"></canvas></div>
+  </div>
+
+  <div id="settingsOverlay" class="overlay hidden">
+    <section id="settingsMenu" class="settings-panel">
+      <header class="settingsHeader"><div><small>ANZU'S JOURNEY</small><h1>Settings</h1></div><button id="closeSettings" class="iconButton" aria-label="Close settings">×</button></header>
+      <div class="settingsLayout">
+        <aside class="settingsTabs" role="tablist">
+          <button class="tabButton active physics-target" data-tab="video">🖼 Video & World</button>
+          <button class="tabButton physics-target" data-tab="graphics">🎮 Graphics & FPS</button>
+          <button class="tabButton physics-target" data-tab="audio">🔊 Audio</button>
+          <button class="tabButton physics-target" data-tab="controls">🎮 Controls</button>
+          <button class="tabButton physics-target" data-tab="gameplay">♿ Gameplay & HUD</button>
+          <button class="tabButton physics-target" data-tab="chaos">⚡ Reality</button>
+        </aside>
+        <main class="settingsContent">
+          <section class="settingsPage active" data-page="video">
+            <h2>Video & World</h2>
+            <div class="settingRow physics-target"><label>Render Distance</label><select id="renderDistance"><option>Near</option><option>Medium</option><option selected>Far</option><option>Ultra</option></select></div>
+            <div class="settingRow physics-target"><label>NPC Density</label><select id="entityDensity"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+            <div class="settingRow physics-target"><label>Resolution Upscaling</label><select id="resolutionMode"><option>Native</option><option>Performance 75%</option><option selected>Balanced 85%</option></select></div>
+            <div class="settingRow physics-target"><label>Texture Quality</label><div class="segmented"><button data-value="Low">Low</button><button data-value="Medium">Medium</button><button class="selected" data-value="High">High</button></div></div>
+          </section>
+          <section class="settingsPage" data-page="graphics">
+            <h2>Graphics & Frame Rates</h2>
+            <div class="settingRow physics-target"><label>Graphics Preset</label><select id="graphicsPreset"><option>Low</option><option>Medium</option><option selected>High</option><option>Ultra</option></select></div>
+            <div class="settingRow physics-target"><label>Target Frame Rate</label><select id="fpsCap"><option>Uncapped/Auto</option><option>30 FPS</option><option selected>60 FPS</option><option>120 FPS</option></select></div>
+            <div class="notice">V-Sync is browser-handled. Locked intervals preserve consistent physics.</div>
+            <div class="settingRow physics-target"><label>Dynamic Resolution</label><input id="resolutionScale" type="range" min="50" max="100" value="85"><output>85%</output></div>
+            <div class="settingRow physics-target"><label>Shadow Map</label><select id="shadowQuality"><option>Off</option><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+            <div class="settingRow physics-target"><label>Particle Limit</label><input id="particleLimit" type="range" min="0" max="100" value="70"><output>70%</output></div>
+            <div class="settingRow physics-target"><label>Anti-Aliasing / smoothing</label><label class="switch"><input id="antiAlias" type="checkbox" checked><span></span></label></div>
+            <div class="settingRow physics-target"><label>Post Processing</label><div class="checks"><label><input type="checkbox" id="bloom"> Bloom</label><label><input type="checkbox" id="motionBlur"> Motion Blur</label><label><input type="checkbox" id="chromatic"> Chromatic</label></div></div>
+          </section>
+          <section class="settingsPage" data-page="audio">
+            <h2>Audio & Environment</h2>
+            <div id="audioSliders"></div>
+            <div class="settingRow physics-target"><label>Mute Audio in Background</label><label class="switch"><input id="muteBackground" type="checkbox" checked><span></span></label></div>
+          </section>
+          <section class="settingsPage" data-page="controls">
+            <h2>Controls</h2>
+            <div class="settingRow physics-target"><label>Camera Sensitivity</label><input id="cameraSensitivity" type="range" min="20" max="200" value="100"><output>100%</output></div>
+            <div class="settingRow physics-target"><label>Aiming Sensitivity</label><input id="aimSensitivity" type="range" min="20" max="200" value="90"><output>90%</output></div>
+            <div class="settingRow physics-target"><label>Invert Y / X</label><div class="checks"><label><input id="invertY" type="checkbox"> Y</label><label><input id="invertX" type="checkbox"> X</label></div></div>
+            <div id="keybinds"></div>
+          </section>
+          <section class="settingsPage" data-page="gameplay">
+            <h2>Gameplay & HUD</h2>
+            <div class="settingRow physics-target"><label>Minimap Mode</label><select id="minimapMode"><option>Rotating Minimap</option><option>Fixed Minimap</option></select></div>
+            <div class="settingRow physics-target"><label>Compass Visible</label><label class="switch"><input id="compassVisible" type="checkbox" checked><span></span></label></div>
+            <div class="settingRow physics-target"><label>Subtitles</label><label class="switch"><input id="subtitles" type="checkbox" checked><span></span></label></div>
+            <div class="settingRow physics-target"><label>Dialogue Background</label><label class="switch"><input id="dialogueBg" type="checkbox" checked><span></span></label></div>
+          </section>
+          <section class="settingsPage" data-page="chaos">
+            <h2>Experimental Reality</h2>
+            <div class="settingRow physics-target"><label>Time Throttler</label><select id="timeThrottler"><option>Normal</option><option>30 FPS</option><option>12 FPS Stop-Motion</option><option>Cinematic Slow-Mo</option></select></div>
+            <div class="settingRow physics-target"><label>Reality Shader</label><select id="realityShader"><option>None</option><option>CRT Scanlines</option><option>8-Bit Gameboy Palette</option><option>Hue-Cycling Trippy Mode</option><option>Deep Fried</option></select></div>
+            <div class="settingRow physics-target"><label>World Distortion</label><select id="worldDistortion"><option>None</option><option>Inception Horizon</option><option>ASCII Conversion</option></select></div>
+            <div class="settingRow physics-target"><label>Break Settings / UI Gravity</label><button id="breakButton" class="dangerButton">Break Settings</button></div>
+            <button id="fixButton" class="fixButton">✦ Fix Menu</button>
+          </section>
+        </main>
+      </div>
+      <footer class="settingsFooter"><button id="resetSettings" class="textButton">Reset to Defaults</button><button id="cancelSettings" class="textButton">Cancel</button><button id="applySettings" class="applyButton">Apply Changes</button></footer>
+    </section>
+  </div>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
